@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StocksService {
     private final StocksRepository repository;
-    public List<Stocks> getStock(String stock_name) throws Exception {
+    public List<Stocks> getStock(String stock_name)  {
         List<Stocks> stocks = repository.findByName(stock_name);
         return stocks;
     }
