@@ -13,5 +13,5 @@ public interface StocksRepository extends JpaRepository<Stocks, Long> {
     List<Stocks> findStocks();
 
     @Query(value = "select * from stocks where stock_name= ?1", nativeQuery = true)
-    List<Stocks> findByName(String stock_name);
+    List<Stocks> findByName(String stockName);
 }

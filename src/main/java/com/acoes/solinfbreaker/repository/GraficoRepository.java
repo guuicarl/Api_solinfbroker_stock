@@ -18,8 +18,8 @@ public interface GraficoRepository extends JpaRepository<Grafico, Long> {
     gra.id_stock = :id_stock and 
     date_trunc('hour', gra.created_on) = date_trunc('hour', cast (:now as Timestamp))
 """)
-    Optional<Grafico> findByIdAndDate(@Param("id_stock") Long id_stock, @Param("now") Timestamp agora);
+    Optional<Grafico> findByIdAndDate(@Param("id_stock") Long idStock, @Param("now") Timestamp agora);
 
     @Query(value = "select * from grafico where id_stock = ?1", nativeQuery = true)
-    List<Grafico> findByStock(Long id_stock);
+    List<Grafico> findByStock(Stocks idStock);
 }

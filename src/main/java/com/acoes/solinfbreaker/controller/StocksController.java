@@ -7,6 +7,8 @@ import com.acoes.solinfbreaker.model.Stocks;
 import com.acoes.solinfbreaker.repository.GraficoRepository;
 import com.acoes.solinfbreaker.repository.StocksRepository;
 import com.acoes.solinfbreaker.service.StocksService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @CrossOrigin
 @RestController
 public class StocksController {
+
+    private static final Logger logger = LoggerFactory.getLogger(StocksController.class);
     @Autowired
     private StocksRepository stocksRepository;
     @Autowired
@@ -31,29 +35,28 @@ public class StocksController {
     @Autowired
     private GraficoRepository graficoRepository;
 
+
     @GetMapping("/stocks/{id}")
-    public Optional<Stocks> obterStock(@PathVariable(value = "id")Long id) throws Exception {
-        Thread.sleep(3000);
+    public Optional<Stocks> obterStock(@PathVariable(value = "id")Long id) {
         return stocksRepository.findById(id);
     }
 
-    @GetMapping("/historico/{id_stock}")
-    public List<Grafico> obterGrafico(@PathVariable(value = "id_stock")Long id_stock) throws Exception {
-        Thread.sleep(3000);
-        return graficoRepository.findByStock(id_stock);
+    @GetMapping("/historico/{idStock}")
+    public List<Grafico> obterGrafico(@PathVariable(value = "idStock")Stocks idStock) {
+        return graficoRepository.findByStock(idStock);
     }
 
-    @GetMapping("/{stock_name}")
-    public ResponseEntity<List<Stocks>> getStocks(@PathVariable("stock_name") String stock_name) {
+    @GetMapping("/{stockName}")
+    public ResponseEntity<List<Stocks>> getStocks(@PathVariable("stockName") String stockName) {
         try {
-            return ResponseEntity.ok().body(service.getStock(stock_name));
+            return ResponseEntity.ok().body(service.getStock(stockName));
         }  catch (Exception e) {
             if(e.getMessage().equals("FAZENDA_NOT_FOUND"))
                 return ResponseEntity.notFound().build();
             return ResponseEntity.badRequest().build();
         }
     }
-    public List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+    private List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
     @GetMapping(value = "/temporeal")
     public SseEmitter temporeal(HttpServletResponse response){
@@ -80,15 +83,15 @@ public class StocksController {
     }
 
     @PostMapping("/teste")
-    public ResponseEntity<?> teste(@RequestBody StockDto stockDto){
+    public ResponseEntity<Stocks> teste(@RequestBody StockDto stockDto){
         Stocks stock = stocksRepository.findById(stockDto.getId()).orElseThrow();
-        if(stockDto.getAsk_max() != null) {
-            stock.setAsk_max(stockDto.getAsk_max());
-            stock.setAsk_min(stockDto.getAsk_min());
+        if(stockDto.getAskMax() != null) {
+            stock.setAskMax(stockDto.getAskMax());
+            stock.setAskMin(stockDto.getAskMin());
         }
-        if (stockDto.getBid_min() != null) {
-            stock.setBid_max(stockDto.getBid_max());
-            stock.setBid_min(stockDto.getBid_min());
+        if (stockDto.getBidMin() != null) {
+            stock.setBidMax(stockDto.getBidMax());
+            stock.setBidMin(stockDto.getBidMin());
         }
          stock = stocksRepository.save(stock);
         publicar();
@@ -101,17 +104,17 @@ public class StocksController {
         Optional<Grafico> historic2 = graficoRepository.findByIdAndDate(stocks.getId(), new Timestamp(date.getTime()));
 
         if(historic2.isPresent()) {
-            if (historic2.get().getHigh() < stocks.getAsk_min()) {
-                historic2.get().setHigh(stocks.getAsk_min());
+            if (historic2.get().getHigh() < stocks.getAskMin()) {
+                historic2.get().setHigh(stocks.getAskMin());
             }
-            if (historic2.get().getLow() > stocks.getAsk_min()) {
-                historic2.get().setLow(stocks.getAsk_min());
+            if (historic2.get().getLow() > stocks.getAskMin()) {
+                historic2.get().setLow(stocks.getAskMin());
             }
-            historic2.get().setFechado(stocks.getAsk_min());
+            historic2.get().setFechado(stocks.getAskMin());
             graficoRepository.save(historic2.get());
         }
-        else if (stocks.getAsk_min() == null){
-            System.out.println("Nao pode ser criado");
+        else if (stocks.getAskMin() == null){
+            logger.error("Não pode ser criado");
         } else {
             graficoRepository.save(new Grafico(stocks));
         }
