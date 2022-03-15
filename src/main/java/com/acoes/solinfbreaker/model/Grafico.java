@@ -16,22 +16,23 @@ public class Grafico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long id_stock;
+    @Column(name = "id_stock")
+    private Long idStock;
     private Double aberto;
     private Double fechado;
     private Double high;
     private Double low;
     @CreationTimestamp
     @Column(name = "created_on")
-    private Timestamp created_on;
+    private Timestamp created;
 
     public Grafico(Stocks stocks) {
         Date date = new Date();
-        this.id_stock = stocks.getId();
-        this.aberto = stocks.getAsk_min();
-        this.fechado = stocks.getAsk_min();
-        this.high = stocks.getAsk_min();
-        this.low = stocks.getAsk_min();
-        this.created_on = new Timestamp(date.getTime());
+        this.idStock = stocks.getId();
+        this.aberto = stocks.getAskMin();
+        this.fechado = stocks.getAskMin();
+        this.high = stocks.getAskMin();
+        this.low = stocks.getAskMin();
+        this.created = new Timestamp(date.getTime());
     }
 }
