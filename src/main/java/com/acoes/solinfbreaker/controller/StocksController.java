@@ -65,7 +65,7 @@ public class StocksController {
         try {
             emitters.add(sseEmitter);
         } catch (Exception e){
-            e.printStackTrace();
+            logger.error("Nao deu certo o tempo real");
         }
         sseEmitter.onCompletion(() -> emitters.remove(sseEmitter));
         return sseEmitter;
