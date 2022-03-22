@@ -23,10 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@CrossOrigin
+@CrossOrigin(origins = { "http://localhost:8082", "http://localhost:8081"})
 @RestController
 public class StocksController {
-
     private static final Logger logger = LoggerFactory.getLogger(StocksController.class);
     @Autowired
     private StocksRepository stocksRepository;
@@ -51,7 +50,7 @@ public class StocksController {
         try {
             return ResponseEntity.ok().body(service.getStock(stockName));
         }  catch (Exception e) {
-            if(e.getMessage().equals("FAZENDA_NOT_FOUND"))
+            if(e.getMessage().equals("Stock_not_found"))
                 return ResponseEntity.notFound().build();
             return ResponseEntity.badRequest().build();
         }
@@ -101,17 +100,17 @@ public class StocksController {
 
     private void atualizaPrices(Stocks stocks) {
         Date date = new Date();
-        Optional<Grafico> historic2 = graficoRepository.findByIdAndDate(stocks.getId(), new Timestamp(date.getTime()));
+        Optional<Grafico> historico = graficoRepository.findByIdAndDate(stocks.getId(), new Timestamp(date.getTime()));
 
-        if(historic2.isPresent()) {
-            if (historic2.get().getHigh() < stocks.getAskMin()) {
-                historic2.get().setHigh(stocks.getAskMin());
+        if(historico.isPresent()) {
+            if (historico.get().getHigh() < stocks.getAskMin()) {
+                historico.get().setHigh(stocks.getAskMin());
             }
-            if (historic2.get().getLow() > stocks.getAskMin()) {
-                historic2.get().setLow(stocks.getAskMin());
+            if (historico.get().getLow() > stocks.getAskMin()) {
+                historico.get().setLow(stocks.getAskMin());
             }
-            historic2.get().setFechado(stocks.getAskMin());
-            graficoRepository.save(historic2.get());
+            historico.get().setFechado(stocks.getAskMin());
+            graficoRepository.save(historico.get());
         }
         else if (stocks.getAskMin() == null){
             logger.error("Não pode ser criado");

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin
+@CrossOrigin(origins = { "http://localhost:8082", "http://localhost:8081"})
 @RestController
 public class GraficoController {
     @Autowired
